@@ -19,16 +19,35 @@ class Charity(models.Model):
     name = models.CharField(max_length=50)
     reg_number = models.CharField(max_length=10)
 
+
 class TaskManager(models.Manager):
     def related_tasks_to_charity(self, user):
-        pass
+        try:
+            charity = Charity.objects.get(user=user)
+            return self.filter(charity=charity)
+        except Charity.DoesNotExist:
+            return self.none()
 
     def related_tasks_to_benefactor(self, user):
-        pass
+        try:
+            benefactor = Benefactor.objects.get(user=user)
+            return self.filter(assigned_benefactor=benefactor)
+        except Benefactor.DoesNotExist:
+            return self.none()
 
     def all_related_tasks_to_user(self, user):
-        pass
-    
+        try:
+            benefactor = Benefactor.objects.get(user=user)
+            charity = Charity.objects.get(user=user)
+
+            tasks_as_benefactor = self.filter(assigned_benefactor=benefactor)
+            tasks_as_charity = self.filter(charity=charity)
+            pending_tasks = self.filter(state='P')
+
+            return (tasks_as_benefactor | tasks_as_charity | pending_tasks).distinct()
+        except (Benefactor.DoesNotExist, Charity.DoesNotExist):
+            return self.filter(state='P')
+
 class Task(models.Model):
     GENDER_CHOICES = [
         ('M', 'Male'),
@@ -36,10 +55,10 @@ class Task(models.Model):
     ]
 
     STATE_CHOICES = [
-        ('P', 'Pending'),  # در انتظار برای درخواست انجام فعالیت توسط نیکوکار
-        ('W', 'Waiting'),  # در انتظار برای تایید درخواست توسط خیریه
-        ('A', 'Assigned'),  # فعالیت به یک نیکوکار اختصاص داده شده
-        ('D', 'Done'),      # به اتمام رسیدن فعالیت
+        ('P', 'Pending'),
+        ('W', 'Waiting'),
+        ('A', 'Assigned'),
+        ('D', 'Done'),
     ]
 
     assigned_benefactor = models.ForeignKey(Benefactor, blank=True, null=True, on_delete=models.SET_NULL)
@@ -51,3 +70,5 @@ class Task(models.Model):
     gender_limit = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
     state = models.CharField(max_length=1, choices=STATE_CHOICES, default='P')
     title = models.CharField(max_length=60)
+
+    objects = TaskManager()
