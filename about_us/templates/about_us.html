@@ -1,0 +1,20 @@
+{% extends "about_us_base.html" %}
+
+{% block team_members %}
+<h2 class="text-center my-5">نیکوکاران و اعضای خیریه‌ها</h2>
+<div class="container">
+  <div class="d-flex flex-wrap justify-content-around">
+    {% for row in users_chunked %}
+    <div style="width: 100%; text-align: center;">
+      {% for user in row %}
+      <span style="margin-left: 30px;">
+        {{ user.get_full_name }}
+        <!-- {% if not forloop.last %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{% endif %} -->
+      </span>
+
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
