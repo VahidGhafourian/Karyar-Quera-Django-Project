@@ -8,9 +8,12 @@ class User(AbstractUser):
         ('F', 'Female'),
     ]
 
-    phone_number = models.CharField(max_length=15, unique=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
     address = models.TextField(max_length=255, blank=True, null=True)
     age = models.PositiveSmallIntegerField(blank=True, null=True)
     description = models.TextField(max_length=255, blank=True, null=True)
-    email = models.EmailField(max_length=124, blank=True, null=True)
+    email = models.EmailField(max_length=124, blank=True, null=True, verbose_name="Email Address")
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True, null=True)
+
+    def __str__(self) -> str:
+        return ''
